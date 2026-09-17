@@ -35,7 +35,7 @@ Default ports:
 | Service | Host port | Container port |
 |---|---:|---:|
 | Frontend | `8080` | `80` |
-| Backend | `30040` | `30040` |
+| Backend API | `30040` | `30040` |
 | PostgreSQL | `30041` | `5432` |
 
 The frontend is the normal entry point for users.
@@ -72,18 +72,24 @@ Do not run the application from a directory containing another project’s envir
 
 ---
 
-## Create Private Environment File
+## Create the Environment File
 
-Copy the example environment file:
+Docker Compose automatically reads a root-level file named:
 
-```powershell
-Copy-Item .env.docker.example .env.docker
+```text
+.env
 ```
 
-Open the private file:
+Copy the public example file to the required private filename:
 
 ```powershell
-notepad .env.docker
+Copy-Item .env.docker.example .env
+```
+
+Open the private environment file:
+
+```powershell
+notepad .env
 ```
 
 Replace every placeholder with a private value.
@@ -125,49 +131,49 @@ Use different random values for:
 
 Do not reuse a password or secret across multiple variables.
 
-Do not commit `.env.docker`.
+Do not commit `.env`.
 
-Check the repository status before continuing:
+Check the repository status:
 
 ```powershell
 git status --short
 ```
 
-The private environment file must not appear as an untracked file ready to commit.
+The private environment file must not appear as an untracked file ready to commit. It should be ignored by `.gitignore`.
 
 ---
 
-## Build and Start
+## Start the Application
 
-Start all services in the background:
-
-```powershell
-docker compose --env-file .env.docker up -d --build
-```
-
-The first build may take several minutes because Docker downloads the base images and installs dependencies.
-
-Check the services:
+Start all containers using the standard Docker Compose command:
 
 ```powershell
-docker compose --env-file .env.docker ps
+docker compose up -d --build
 ```
 
-The PostgreSQL container must become healthy before the backend can connect.
+Docker Compose automatically reads the root-level `.env` file and substitutes its values into `docker-compose.yml`.
+
+Check the container status:
+
+```powershell
+docker compose ps
+```
 
 View startup logs:
 
 ```powershell
-docker compose --env-file .env.docker logs --tail=100
+docker compose logs --tail=100
 ```
 
-View one service:
+View logs for an individual service:
 
 ```powershell
-docker compose --env-file .env.docker logs --tail=100 backend
-docker compose --env-file .env.docker logs --tail=100 frontend
-docker compose --env-file .env.docker logs --tail=100 postgres
+docker compose logs --tail=100 backend
+docker compose logs --tail=100 frontend
+docker compose logs --tail=100 postgres
 ```
+
+The PostgreSQL container must become healthy before the backend can connect to it. The backend waits for the PostgreSQL health check configured in `docker-compose.yml`.
 
 ---
 
@@ -176,13 +182,13 @@ docker compose --env-file .env.docker logs --tail=100 postgres
 After the containers are running, apply all tracked Knex migrations:
 
 ```powershell
-docker compose --env-file .env.docker exec backend npm run migrate:latest
+docker compose exec backend npm run migrate:latest
 ```
 
 Check migration status:
 
 ```powershell
-docker compose --env-file .env.docker exec backend npm run migrate:status
+docker compose exec backend npm run migrate:status
 ```
 
 The migration command must complete successfully before the first login.
@@ -204,7 +210,7 @@ IUVO does not include a default Super username or password.
 Create the sole Super account interactively:
 
 ```powershell
-docker compose --env-file .env.docker exec -it backend npm run create-super
+docker compose exec -it backend npm run create-super
 ```
 
 The command prompts for:
@@ -272,11 +278,13 @@ Invoke-WebRequest http://localhost:8080
 
 A successful response should have HTTP status `200`.
 
-Check container health and status:
+Check container status:
 
 ```powershell
-docker compose --env-file .env.docker ps
+docker compose ps
 ```
+
+The PostgreSQL service should show a healthy status after startup.
 
 ---
 
@@ -287,7 +295,7 @@ Before updating, create a database backup according to `BACKUP-RESTORE.md`.
 Then stop the application:
 
 ```powershell
-docker compose --env-file .env.docker down
+docker compose down
 ```
 
 Download the latest source:
@@ -296,25 +304,31 @@ Download the latest source:
 git pull origin main
 ```
 
-Rebuild the images:
+Rebuild and restart the containers:
 
 ```powershell
-docker compose --env-file .env.docker up -d --build
+docker compose up -d --build
 ```
 
 Apply any new migrations:
 
 ```powershell
-docker compose --env-file .env.docker exec backend npm run migrate:latest
+docker compose exec backend npm run migrate:latest
 ```
 
 Check the logs:
 
 ```powershell
-docker compose --env-file .env.docker logs --tail=100
+docker compose logs --tail=100
 ```
 
-The PostgreSQL volume is preserved by `docker compose down`. Do not use `down --volumes` unless you intentionally want to delete the database.
+The PostgreSQL volume is preserved by:
+
+```powershell
+docker compose down
+```
+
+Do not use `down --volumes` unless you intentionally want to delete the database.
 
 ---
 
@@ -323,13 +337,13 @@ The PostgreSQL volume is preserved by `docker compose down`. Do not use `down --
 Stop and remove the containers while preserving database data:
 
 ```powershell
-docker compose --env-file .env.docker down
+docker compose down
 ```
 
 Start the existing deployment again:
 
 ```powershell
-docker compose --env-file .env.docker up -d
+docker compose up -d
 ```
 
 Do not run:
@@ -347,10 +361,10 @@ unless you intentionally want to destroy the PostgreSQL data volume.
 To rebuild the application images while preserving PostgreSQL data:
 
 ```powershell
-docker compose --env-file .env.docker up -d --build
+docker compose up -d --build
 ```
 
-The named volume remains intact unless it is explicitly removed.
+The named PostgreSQL volume remains intact unless it is explicitly removed.
 
 List Docker volumes:
 
@@ -358,16 +372,14 @@ List Docker volumes:
 docker volume ls
 ```
 
-The Compose-managed PostgreSQL volume is usually named using the project directory prefix and `postgres_data`.
-
 ---
 
 ## Super Recovery
 
-If the Super password must be replaced through the approved break-glass process, set `SUPER_RECOVERY_KEY` in the private `.env.docker` file and run:
+If the Super password must be replaced through the approved break-glass process, confirm that `SUPER_RECOVERY_KEY` is set in the private `.env` file and run:
 
 ```powershell
-docker compose --env-file .env.docker exec -it backend npm run recover-super
+docker compose exec -it backend npm run recover-super
 ```
 
 The recovery command:
@@ -396,10 +408,10 @@ Read `RECOVERY.md` before using this procedure.
 
 Before exposing IUVO beyond a local development machine:
 
-- Replace every placeholder in `.env.docker`.
+- Replace every placeholder in `.env`.
 - Use long, randomly generated secrets.
 - Use a strong database password.
-- Keep `.env.docker` outside Git.
+- Keep `.env` outside Git.
 - Restrict access to ports `30040` and `30041`.
 - Expose only the frontend through the intended reverse proxy or firewall.
 - Use HTTPS at the public edge.
@@ -412,6 +424,24 @@ Before exposing IUVO beyond a local development machine:
 - Do not run load tests against production.
 - Do not use disposable test data in production.
 - Review audit records and container logs regularly.
+
+### PostgreSQL host port
+
+For local testing, PostgreSQL is exposed on host port `30041`.
+
+For a server deployment where the database does not need to be accessed directly from the host, consider removing this mapping from `docker-compose.yml`:
+
+```yaml
+ports:
+  - "30041:5432"
+```
+
+The backend will still connect internally using:
+
+```yaml
+DB_HOST: postgres
+DB_PORT: 5432
+```
 
 ---
 
@@ -441,16 +471,22 @@ Each deployment owner creates the first Super account manually and then creates 
 Check the database logs:
 
 ```powershell
-docker compose --env-file .env.docker logs postgres
+docker compose logs postgres
 ```
 
 Check the service status:
 
 ```powershell
-docker compose --env-file .env.docker ps
+docker compose ps
 ```
 
-Confirm that `DB_USER`, `DB_PASSWORD`, and `DB_NAME` match between `.env.docker` and the Compose configuration.
+Confirm that `DB_USER`, `DB_PASSWORD`, and `DB_NAME` are set correctly in `.env`.
+
+Restart the services:
+
+```powershell
+docker compose restart postgres backend
+```
 
 ### Backend cannot connect to PostgreSQL
 
@@ -463,10 +499,10 @@ DB_PORT=5432
 
 Do not use `localhost` for `DB_HOST` inside the backend container.
 
-Restart the services:
+Check the backend logs:
 
 ```powershell
-docker compose --env-file .env.docker restart postgres backend
+docker compose logs backend
 ```
 
 ### Migration fails
@@ -474,13 +510,13 @@ docker compose --env-file .env.docker restart postgres backend
 View backend logs:
 
 ```powershell
-docker compose --env-file .env.docker logs --tail=200 backend
+docker compose logs --tail=200 backend
 ```
 
 Check migration status:
 
 ```powershell
-docker compose --env-file .env.docker exec backend npm run migrate:status
+docker compose exec backend npm run migrate:status
 ```
 
 Do not manually edit the production database to bypass a failed migration.
@@ -490,19 +526,19 @@ Do not manually edit the production database to bypass a failed migration.
 Check frontend logs:
 
 ```powershell
-docker compose --env-file .env.docker logs --tail=200 frontend
+docker compose logs --tail=200 frontend
 ```
 
-Confirm the frontend container is running:
+Confirm that the frontend container is running:
 
 ```powershell
-docker compose --env-file .env.docker ps frontend
+docker compose ps frontend
 ```
 
 Rebuild the frontend:
 
 ```powershell
-docker compose --env-file .env.docker up -d --build frontend
+docker compose up -d --build frontend
 ```
 
 ### The browser cannot reach the backend
@@ -510,7 +546,7 @@ docker compose --env-file .env.docker up -d --build frontend
 Confirm the backend is running:
 
 ```powershell
-docker compose --env-file .env.docker ps backend
+docker compose ps backend
 ```
 
 Check the health endpoint:
@@ -529,6 +565,6 @@ FRONTEND_ORIGIN=http://localhost:8080
 
 ## Related Documentation
 
+- [Project README](README.md)
 - [Backup and restore](BACKUP-RESTORE.md)
 - [Super recovery procedure](RECOVERY.md)
-- [Project README](README.md)
