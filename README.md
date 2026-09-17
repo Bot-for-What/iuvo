@@ -14,6 +14,12 @@ Instead of relying on phone calls, informal messages, or paper logs, staff can r
 
 ---
 
+- **Evaluation use only:** IUVO is published for demonstration, testing, and
+- feedback. Commercial use, sale, redistribution, hosting, and sublicensing
+- require prior written permission. See [LICENSE](LICENSE).
+
+---
+
 ## Product Overview
 
 IUVO is designed around a structured, role-based workflow. Each user receives exactly one role, with permissions limited to the responsibilities required for that role.
@@ -603,3 +609,27 @@ Load tests create disposable records and should not be run against production.
 - [Deployment guide](DEPLOYMENT.md)
 - [Backup and restore](BACKUP-RESTORE.md)
 - [Super recovery procedure](RECOVERY.md)
+
+---
+
+## License and Usage
+
+IUVO is provided under the IUVO Evaluation License.
+
+You may download and run the application for:
+
+- Demonstration.
+- Evaluation.
+- Testing.
+- Education.
+- Feedback and bug reporting.
+
+Without prior written permission, you may not:
+
+- Sell the application.
+- Commercialize the application.
+- Offer it as a hosted or SaaS service.
+- Redistribute the application or modified versions.
+- Use it to provide services to third parties.
+
+See the [LICENSE](LICENSE) file for the complete terms.
