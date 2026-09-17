@@ -388,7 +388,7 @@ IUVO’s core application functionality, Docker setup, authentication, role-base
 The remaining project work is documentation verification and a clean-clone deployment test.
 
 ---
-## IMAGES
+## Project Images
 
 <img width="486" height="350" alt="image" src="https://github.com/user-attachments/assets/15af1075-e198-4428-80b0-736cbf3c7192" />
 <img width="489" height="352" alt="image" src="https://github.com/user-attachments/assets/2f6fe2c7-1241-43fd-88d0-f7c5781c37b1" />
@@ -398,8 +398,8 @@ The remaining project work is documentation verification and a clean-clone deplo
 ---
 
 ## Contact
-
-For questions about this platform, please contact me.
+   For questions about this platform, please contact me.
+   
 ---
 
 ## Quick Start
