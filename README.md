@@ -632,4 +632,4 @@ Without prior written permission, you may not:
 - Redistribute the application or modified versions.
 - Use it to provide services to third parties.
 
-See the [LICENSE](LICENSE) file for the complete terms.
+See the [LICENSE](LICENSE.md) file for the complete terms.
