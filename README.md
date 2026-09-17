@@ -70,7 +70,7 @@ Every request has its own conversation thread, so context stays attached to the 
 
  
 Reporting & Insight for Leadership
-Management and platform administrators have access to a full operational dashboard, giving leadership a real-time view across every unit without needing to chase updates manually.
+Management and Super users have access to the operational dashboard. Management provides cross-unit read-only reporting access, while Super has system-wide oversight.
 •	Ticket volumes by status, department, and unit
 •	Average resolution time and workload distribution across team members
 •	Open-versus-closed trends over time
