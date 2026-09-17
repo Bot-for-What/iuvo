@@ -8,6 +8,8 @@ frontend/.env
 !backend/.env.example
 !frontend/.env.example
 !.env.docker.example
+frontend/public/client-assets/*
+!frontend/public/client-assets/.gitkeep
 
 node_modules/
 dist/
