@@ -94,6 +94,65 @@ notepad .env
 
 Replace every placeholder with a private value.
 
+Do not commit `.env.docker`.
+
+---
+
+## Start IUVO
+
+Start the application explicitly using `.env.docker`:
+
+```powershell
+docker compose --env-file .env.docker up -d --build
+```
+
+The backend automatically applies pending database migrations before starting
+the application server.
+
+Check the containers:
+
+```powershell
+docker compose --env-file .env.docker ps
+```
+
+Create the first and only Super account:
+
+```powershell
+docker compose --env-file .env.docker exec -it backend npm run create-super
+```
+
+Open IUVO at:
+
+```text
+http://localhost:8080
+```
+
+The backend health endpoint is available at:
+
+```text
+http://localhost:30040/health
+```
+
+All Docker commands in this guide intentionally include
+`--env-file .env.docker`. This explicitly selects the private deployment
+configuration and avoids relying on Docker Compose's automatic `.env` lookup.
+
+---
+
+## Health Checks
+
+Check the backend:
+
+```powershell
+Invoke-WebRequest http://localhost:30040/health
+```
+
+Check the container status:
+
+```powershell
+docker compose --env-file .env.docker ps
+```
+
 A deployment environment requires values for:
 
 ```env
