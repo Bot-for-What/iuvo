@@ -108,3 +108,114 @@ iuvo's unit-and-department model was built to scale from a single facility to a 
 This approach keeps the platform lean and focused today, while ensuring it can adapt as the organization's needs evolve.
  
 For questions about this platform, please contact me.
+
+---
+## Quick Start
+
+IUVO is deployed as Docker containers with PostgreSQL.
+
+### Requirements
+
+- Git
+- Docker Desktop
+- Docker Compose v2
+- At least 2 GB of available memory for the containers
+
+### Clone the repository
+
+```powershell
+git clone [https://github.com/Bot-for-What/iuvo.git](https://github.com/Bot-for-What/iuvo.git)
+cd iuvo
+```
+
+### Create private environment files
+
+Copy the provided examples:
+
+```powershell
+Copy-Item .env.docker.example .env.docker
+Copy-Item backend\.env.example backend\.env
+Copy-Item frontend\.env.example frontend\.env
+```
+
+Open the files and replace every placeholder with a private value:
+
+```powershell
+notepad .env.docker
+notepad backend\.env
+notepad frontend\.env
+```
+
+Never commit these private files.
+
+### Start IUVO
+
+```powershell
+docker compose up -d --build
+```
+
+Check the containers:
+
+```powershell
+docker compose ps
+```
+
+Check the backend health endpoint:
+
+```powershell
+curl http://localhost:30040/health
+```
+
+The expected response is similar to:
+
+```json
+{
+  "status": "ok"
+}
+```
+
+### Apply database migrations
+
+```powershell
+docker compose exec backend npm run migrate:latest
+```
+
+### Create the first Super account
+
+The repository does not contain a default user, demo account, or hardcoded password.
+
+Create the one permitted Super account interactively:
+
+```powershell
+docker compose exec -it backend npm run create-super
+```
+
+Follow the prompts for:
+
+- Username
+- Full name
+- Password
+- Password confirmation
+
+The Super password must contain:
+
+- At least 12 characters.
+- One uppercase letter.
+- One lowercase letter.
+- One number.
+- One special character.
+
+### Open the application
+
+Open the frontend URL configured for the Docker deployment, then sign in with the Super account created above.
+
+The Super account can create:
+
+- Units.
+- Unit department configuration.
+- Management users.
+- Admin users.
+- Team users.
+- Staff users.
+
+IUVO intentionally does not include seeded users or shared demo credentials.
